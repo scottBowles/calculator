@@ -27,6 +27,7 @@ const operationFunctions = {
   "+": add,
   "-": subtract,
   "*": multiply,
+  "x": multiply,
   "/": divide,
   "%": percent,
 }
@@ -39,7 +40,7 @@ function operate () {
 
   firstOperand = String(result);
   roundedForDisplay = String(Math.round((+firstOperand + Number.EPSILON) * 10000) / 10000);
-  display.textContent = roundedForDisplay;
+  display.textContent = isNaN(roundedForDisplay) ? firstOperand : roundedForDisplay;
 
   workingEntry = undefined;
   secondOperand = undefined;
@@ -54,6 +55,7 @@ buttons.forEach( button =>
     newInput(button.textContent))
 );
 
+document.addEventListener("keydown", (e) => newInput(e.key));
 
 const display = document.querySelector("#display");
 
@@ -72,7 +74,7 @@ function newInput(input){
       display.textContent = workingEntry;
       break;
 
-    case ["/", "*", "-", "+", "%"].includes(input) ? input : null: 
+    case ["/", "*", "x", "-", "+", "%"].includes(input) ? input : null: 
       if (operator) {
         operate();
       }
@@ -96,6 +98,7 @@ function newInput(input){
       break;
 
     case "+/-":
+    case "_":
       if (workingEntry) {
         workingEntry = String(+workingEntry * -1);
         display.textContent = workingEntry;
@@ -107,6 +110,7 @@ function newInput(input){
       break;
       
     case "=":
+    case "Enter":
       if (operator) {
         operate();
       }
@@ -130,6 +134,6 @@ function newInput(input){
       break;
 
     default:
-      console.log("Something went wrong");
+      
   }
 }
