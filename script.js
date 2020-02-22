@@ -32,14 +32,19 @@ const operationFunctions = {
 }
 
 function operate () {
-  firstOperand = firstOperand || "0";
-  secondOperand = workingEntry ? +workingEntry : undefined;
-  let result = operationFunctions[operator](+firstOperand, secondOperand);
+
+  firstOperand = +(firstOperand || 0);
+  secondOperand = workingEntry ? +workingEntry : undefined;    // When undefined, each operation defaults to its identity function.
+  let result = operationFunctions[operator](firstOperand, secondOperand);
+
   firstOperand = String(result);
+  roundedForDisplay = String(Math.round((+firstOperand + Number.EPSILON) * 10000) / 10000);
+  display.textContent = roundedForDisplay;
+
   workingEntry = undefined;
   secondOperand = undefined;
   operator = undefined;
-  display.textContent = firstOperand;
+
 }
 
 
@@ -59,28 +64,26 @@ let secondOperand = undefined;
 let operator = undefined;
 
 function newInput(input){
+
   switch (input) {
-    case (!isNaN(+input) ? input : null):
+
+    case [0,1,2,3,4,5,6,7,8,9].includes(+input) ? input : null:
       workingEntry ? workingEntry += input : workingEntry = input;
       display.textContent = workingEntry;
       break;
-    case "/": 
-    case "*": 
-    case "-": 
-    case "+":  
-    case "%": 
+
+    case ["/", "*", "-", "+", "%"].includes(input) ? input : null: 
       if (operator) {
         operate();
       }
       else {
-        if (workingEntry) {
-          firstOperand = workingEntry;
-          workingEntry = undefined;
-        }
+        firstOperand = workingEntry || firstOperand;
+        workingEntry = undefined;
       }
       display.textContent += input;
       operator = input;
       break;
+
     case ".":
       if (!workingEntry) {
         workingEntry = "0.";
@@ -91,6 +94,7 @@ function newInput(input){
         display.textContent = workingEntry;
       }
       break;
+
     case "+/-":
       if (workingEntry) {
         workingEntry = String(+workingEntry * -1);
@@ -101,6 +105,7 @@ function newInput(input){
         display.textContent = firstOperand;
       }
       break;
+      
     case "=":
       if (operator) {
         operate();
@@ -110,10 +115,12 @@ function newInput(input){
         workingEntry = undefined;
       }
       break;
+
     case "Clear":
       display.textContent = firstOperand || "0";
       workingEntry = undefined;
       break;
+
     case "Clear All":
       display.textContent = "0"
       workingEntry = undefined;
@@ -121,6 +128,7 @@ function newInput(input){
       secondOperand = undefined;
       operator = undefined;
       break;
+
     default:
       console.log("Something went wrong");
   }
