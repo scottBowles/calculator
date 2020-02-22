@@ -11,7 +11,12 @@ function multiply (a, b=1) {
 }
 
 function divide (a, b=1) {
-  return a / b;
+  if (b == 0) {
+    return "No dividing by zero";
+  }
+  else {
+    return a / b;
+  }
 }
 
 function percent(a, b=1) {
@@ -27,8 +32,9 @@ const operationFunctions = {
 }
 
 function operate () {
-  secondOperand = workingEntry;
-  let result = operationFunctions[operator](+firstOperand, (secondOperand ? +secondOperand : undefined));
+  firstOperand = firstOperand || "0";
+  secondOperand = workingEntry ? +workingEntry : undefined;
+  let result = operationFunctions[operator](+firstOperand, secondOperand);
   firstOperand = String(result);
   workingEntry = undefined;
   secondOperand = undefined;
