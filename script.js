@@ -35,12 +35,12 @@ const operationFunctions = {
 function operate () {
 
   firstOperand = +(firstOperand || 0);
-  secondOperand = workingEntry ? +workingEntry : undefined;    // When undefined, each operation defaults to its identity function.
+  secondOperand = workingEntry ? +workingEntry : undefined;    // When undefined, each operation defaults to its identity function
   let result = operationFunctions[operator](firstOperand, secondOperand);
 
   firstOperand = String(result);
   roundedForDisplay = String(Math.round((+firstOperand + Number.EPSILON) * 10000) / 10000);
-  display.textContent = isNaN(roundedForDisplay) ? firstOperand : roundedForDisplay;
+  display.textContent = isNaN(roundedForDisplay) ? firstOperand : roundedForDisplay;    // Allows for error messages (e.g., divide by zero)
 
   workingEntry = undefined;
   secondOperand = undefined;
@@ -48,14 +48,6 @@ function operate () {
 
 }
 
-
-const buttons = document.querySelectorAll("button");
-buttons.forEach( button => 
-  button.addEventListener("click", () => 
-    newInput(button.textContent))
-);
-
-document.addEventListener("keydown", (e) => newInput(e.key));
 
 const display = document.querySelector("#display");
 
@@ -65,7 +57,35 @@ let firstOperand = undefined;
 let secondOperand = undefined;
 let operator = undefined;
 
+function lastState(display, workingEntry, firstOperand, secondOperand, operator) {
+  return {
+    display,
+    workingEntry,
+    firstOperand,
+    secondOperand,
+    operator,
+  }
+}
+
+let pastStates = [];
+
+
+const buttons = document.querySelectorAll("button");
+buttons.forEach( button => 
+  button.addEventListener("click", () => 
+    newInput(button.textContent))
+);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") e.preventDefault();
+  newInput(e.key);
+});
+
+
+
 function newInput(input){
+
+  if (input !== "Backspace") pastStates.push(lastState(display.textContent, workingEntry, firstOperand, secondOperand, operator));
 
   switch (input) {
 
@@ -118,11 +138,18 @@ function newInput(input){
         firstOperand = workingEntry;
         workingEntry = undefined;
       }
+      return null;
       break;
 
     case "Clear":
+    case "Escape":
       display.textContent = firstOperand || "0";
       workingEntry = undefined;
+      break;
+
+    case "Backspace":
+      let lastState = pastStates.pop();
+      [display.textContent, workingEntry, firstOperand, secondOperand, operator] = [lastState["display"], lastState["workingEntry"], lastState["firstOperand"], lastState["secondOperand"], lastState["operator"]];
       break;
 
     case "Clear All":
@@ -134,6 +161,7 @@ function newInput(input){
       break;
 
     default:
-      
+      pastStates.pop();
+      break;
   }
 }
